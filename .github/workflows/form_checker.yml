@@ -1,0 +1,32 @@
+name: Daily Form Checker
+
+on:
+  schedule:
+    - cron: "0 14 * * *" # 9AM EST
+  workflow_dispatch:
+
+jobs:
+  send_flight_notification:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.9"
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Run the Python script
+      env:
+        SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+        EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+        RECIPIENT_EMAILS: ${{ secrets.RECIPIENT_EMAILS }}  
+        FORM_URL: ${{ secrets.FORM_URL }}
+        FORM_EMAIL: ${{ secrets.FORM_EMAIL }}
+      run: python -u main_function.py
