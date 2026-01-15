@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import requests
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 
 
 def send_message(message, sender_email, sender_password, recipient_emails):
@@ -64,7 +64,7 @@ def submit_form(form_action_url, base_email):
 
 
 def main():
-    load_dotenv()
+    #load_dotenv()
 
     sender_email = os.getenv("SENDER_EMAIL")
     sender_password = os.getenv("EMAIL_PASSWORD")
