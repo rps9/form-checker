@@ -7,7 +7,10 @@ on:
 
 jobs:
   keepalive:
+    name: Keepalive Workflow
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
     steps:
-      - name: Keep workflows alive
-        uses: gautamkrishnar/keepalive-workflow@v1
+      - uses: actions/checkout@v4
+      - uses: gautamkrishnar/keepalive-workflow@v2
