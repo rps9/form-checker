@@ -29,4 +29,5 @@ jobs:
         RECIPIENT_EMAILS: ${{ secrets.RECIPIENT_EMAILS }}  
         FORM_URL: ${{ secrets.FORM_URL }}
         FORM_EMAIL: ${{ secrets.FORM_EMAIL }}
+        RECIPIENT_EMAILS_FAILED: ${{ secrets.RECIPIENT_EMAILS_FAILED }}
       run: python -u main_function.py
