@@ -27,7 +27,7 @@ jobs:
         SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
         EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
         RECIPIENT_EMAILS: ${{ secrets.RECIPIENT_EMAILS }}  
-        FORM_ACTION_URL: ${{ secrets.FORM_ACTION_URL }}
+        FORM_URL: ${{ secrets.FORM_URL }}
         FORM_EMAIL: ${{ secrets.FORM_EMAIL }}
         RECIPIENT_EMAILS_FAILED: ${{ secrets.RECIPIENT_EMAILS_FAILED }}
-      run: python -u main_function.py
+      run: python -u form_checker.py

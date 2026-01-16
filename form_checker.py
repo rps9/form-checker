@@ -1,9 +1,10 @@
 import smtplib
 import os
+import re
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import requests
-#from dotenv import load_dotenv
+from dotenv import load_dotenv
 
 
 def send_message(message, sender_email, sender_password, recipient_emails):
@@ -25,18 +26,15 @@ def _today_strings():
 
 
 def _build_email_with_date(base_email, date_compact):
-    if not base_email:
-        base_email = "form.checker@example.com"
     if "@" not in base_email:
-        return f"{base_email}.{date_compact}@example.com"
+        return f"{base_email}.{date_compact}"
     local, domain = base_email.split("@", 1)
     return f"{local}+{date_compact}@{domain}"
 
 
-def submit_form(form_action_url, base_email):
+def _build_payload(base_email):
     date_display, date_compact = _today_strings()
     email_value = _build_email_with_date(base_email, date_compact)
-
     payload = {
         "entry.10882405": email_value,
         "entry.45946671": f"Form Checker {date_display}",
@@ -50,7 +48,43 @@ def submit_form(form_action_url, base_email):
         "entry.1799808608": "In Office",
         "entry.1492622105": "Male",
     }
+    return payload
 
+
+def _fetch_form_entry_ids(form_view_url):
+    response = requests.get(form_view_url, timeout=20)
+    response.raise_for_status()
+    html = response.text
+    entry_ids = set(re.findall(r'data-params="[^"]*?\[\[(\d+),', html))
+    if entry_ids:
+        return {f"entry.{entry_id}" for entry_id in entry_ids}
+    return set(re.findall(r'name="(entry\.\d+)"', html))
+
+
+def _compare_payload_to_form(payload, form_view_url):
+    form_entries = _fetch_form_entry_ids(form_view_url)
+    payload_entries = set(payload.keys())
+    missing_in_form = sorted(payload_entries - form_entries)
+    missing_in_payload = sorted(form_entries - payload_entries)
+    return missing_in_form, missing_in_payload
+
+
+def check_form_entries(form_view_url, payload):
+    try:
+        missing_in_form, missing_in_payload = _compare_payload_to_form(payload, form_view_url)
+    except requests.RequestException as exc:
+        return False, f"Form entry check failed: {exc}"
+    if missing_in_form or missing_in_payload:
+        details = []
+        if missing_in_form:
+            details.append(f"Entries in payload not in form: {', '.join(missing_in_form)}")
+        if missing_in_payload:
+            details.append(f"Entries in form not in payload: {', '.join(missing_in_payload)}")
+        return False, "Form entry mismatch detected. " + " | ".join(details)
+    return True, "Form entry check passed."
+
+
+def submit_form(form_action_url, payload):
     response = requests.post(form_action_url, data=payload, timeout=20)
     if response.status_code == 200:
         success_text = (
@@ -64,16 +98,22 @@ def submit_form(form_action_url, base_email):
 
 
 def main():
-    #load_dotenv()
+    load_dotenv()
 
     sender_email = os.getenv("SENDER_EMAIL")
     sender_password = os.getenv("EMAIL_PASSWORD")
-    recipient_emails = os.getenv("RECIPIENT_EMAILS") or os.getenv("RECIPIENT_EMAIL")
+    recipient_emails = os.getenv("RECIPIENT_EMAILS")
     failed_recipient_emails = os.getenv("RECIPIENT_EMAILS_FAILED")
-    form_action_url = os.getenv("FORM_ACTION_URL")
-    base_email = os.getenv("FORM_EMAIL", sender_email)
+    form_url = os.getenv("FORM_URL")
 
-    success, message = submit_form(form_action_url, base_email)
+    form_action_url = f"{form_url}/formResponse"
+    form_view_url = f"{form_url}/viewform"
+
+    payload = _build_payload(sender_email)
+    check_success, check_message = check_form_entries(form_view_url, payload)
+    submit_success, submit_message = submit_form(form_action_url, payload)
+    success = check_success and submit_success
+    message = f"{check_message}\n{submit_message}"
     print(message)
 
     if sender_email and sender_password:
