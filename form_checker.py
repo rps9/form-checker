@@ -37,13 +37,13 @@ def _build_payload(base_email):
     email_value = _build_email_with_date(base_email, date_compact)
     payload = {
         "entry.10882405": email_value,
-        "entry.45946671": f"Form Checker {date_display}",
+        "entry.45946671": f"CANARY Form Checker {date_display}",
         "entry.1474145636": date_display,
-        "entry.1752543779": f"123 Test St {date_display}",
-        "entry.1439816745": f"555-0100 {date_display}",
-        "entry.1931067816": f"Test Insurance {date_display}",
-        "entry.1143925446": f"Dr. Example {date_display}",
-        "entry.220115827": f"Automated daily check {date_display}",
+        "entry.1752543779": f"CANARY Form Checker {date_display}",
+        "entry.1439816745": f"CANARY Form Checker {date_display}",
+        "entry.1931067816": f"CANARY Form Checker {date_display}",
+        "entry.1143925446": f"CANARY Form Checker {date_display}",
+        "entry.220115827": f"CANARY Form Checker {date_display}",
         "entry.766197364": "Daytime before 3:00pm",
         "entry.1799808608": "In Office",
         "entry.1492622105": "Male",
@@ -109,7 +109,7 @@ def main():
     form_action_url = f"{form_url}/formResponse"
     form_view_url = f"{form_url}/viewform"
 
-    payload = _build_payload(sender_email)
+    payload = _build_payload("form_checker@gmail.com")
     check_success, check_message = check_form_entries(form_view_url, payload)
     submit_success, submit_message = submit_form(form_action_url, payload)
     success = check_success and submit_success

@@ -1,16 +1,10 @@
-function onFormSubmit(e) {
-  const nv = e.namedValues || {}; // question titles → array of answers
+function deleteCanaryRowOnSubmit(e) {
+  const nv = e.namedValues || {};
   const allValues = Object.values(nv).flat().map(String);
 
-  const hasFormCheckerName = allValues.some(v => v.startsWith("Form Checker "));
-  const hasAutomatedDailyCheck = allValues.some(v => v.startsWith("Automated daily check "));
-  const hasDatedPlusEmail = allValues.some(v => /\+\d{8}@/.test(v));
-
-  const isCanary = (hasFormCheckerName && hasAutomatedDailyCheck) || (hasAutomatedDailyCheck && hasDatedPlusEmail);
+  const isCanary = allValues.some(v => v.includes("CANARY Form Checker"));
   if (!isCanary) return;
 
-  // The submitted row range is provided by the event object.
-  const sheet = e.range.getSheet();
-  const row = e.range.getRow();
-  sheet.deleteRow(row);
+  // Delete the exact row that was just written
+  e.range.getSheet().deleteRow(e.range.getRow());
 }

@@ -1,11 +1,10 @@
-function onFormSubmit(e) {
-  const form = e.source;                 // Form object
-  const response = e.response;           // FormResponse object
-  const responseId = response.getId();   // needed for deleteResponse()
-
+function deleteCanaryOnSubmit(e) {
+  const form = e.source;          // Form
+  const response = e.response;    // FormResponse (forms on-submit event)
+  const responseId = response.getId();
   if (!responseId) return;
 
-  // Collect all answers into a flat string list (handles arrays for checkboxes, etc.)
+  // Gather all answers into strings
   const answers = response.getItemResponses().flatMap(ir => {
     const r = ir.getResponse();
     if (Array.isArray(r)) return r.map(String);
@@ -13,13 +12,7 @@ function onFormSubmit(e) {
     return [String(r)];
   });
 
-  // Make the canary match strict to avoid deleting real submissions accidentally.
-  const hasFormCheckerName = answers.some(a => a.startsWith("Form Checker "));
-  const hasAutomatedDailyCheck = answers.some(a => a.startsWith("Automated daily check "));
-  const hasDatedPlusEmail = answers.some(a => /\+\d{8}@/.test(a)); // your local+YYYYMMDD@domain
-
-  const isCanary = (hasFormCheckerName && hasAutomatedDailyCheck) || (hasAutomatedDailyCheck && hasDatedPlusEmail);
-
+  const isCanary = answers.some(a => a.includes("CANARY Form Checker"));
   if (isCanary) {
     form.deleteResponse(responseId);
   }
