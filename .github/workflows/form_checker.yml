@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  send_flight_notification:
+  check_form:
     runs-on: ubuntu-latest
 
     steps:
